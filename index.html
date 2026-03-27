@@ -2,9 +2,11 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CRUD Firebase</title>
 </head>
 <body>
+
   <h1>CRUD de Usuarios</h1>
 
   <input type="text" id="nombre" placeholder="Nombre">
@@ -13,11 +15,13 @@
   <button onclick="crearUsuario()">Guardar</button>
   <button onclick="actualizarUsuario()">Actualizar</button>
   <button onclick="limpiar()">Limpiar</button>
+  <button onclick="pruebaFirebase()">Prueba Firebase</button>
 
   <ul id="lista"></ul>
 
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
   <script src="app.js"></script>
+
 </body>
 </html>

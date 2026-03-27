@@ -1,4 +1,3 @@
-// CONFIGURACIÓN FIREBASE
 const firebaseConfig = {
   apiKey: "AIzaSyCLUbc6f6HmkAa3XEHfYeiS2g9HtVmirpU",
   authDomain: "crud-online-ca595.firebaseapp.com",
@@ -11,15 +10,14 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// VARIABLE GLOBAL
+console.log("Firebase conectado");
+
 let idSeleccionado = null;
 
-// VALIDAR EMAIL
 function correoValido(correo) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo);
 }
 
-// CREATE (Crear)
 function crearUsuario() {
   const nombre = document.getElementById("nombre").value.trim();
   const correo = document.getElementById("correo").value.trim();
@@ -49,7 +47,6 @@ function crearUsuario() {
   });
 }
 
-// READ (Leer)
 function leerUsuarios() {
   const lista = document.getElementById("lista");
   lista.innerHTML = "<li>Cargando usuarios...</li>";
@@ -81,14 +78,12 @@ function leerUsuarios() {
     });
 }
 
-// UPDATE (Preparar edición)
 function editarUsuario(id, nombre, correo) {
   document.getElementById("nombre").value = nombre;
   document.getElementById("correo").value = correo;
   idSeleccionado = id;
 }
 
-// UPDATE (Actualizar)
 function actualizarUsuario() {
   const nombre = document.getElementById("nombre").value.trim();
   const correo = document.getElementById("correo").value.trim();
@@ -123,7 +118,6 @@ function actualizarUsuario() {
   });
 }
 
-// DELETE (Eliminar)
 function eliminarUsuario(id) {
   const confirmar = confirm("¿Seguro que deseas eliminar este usuario?");
   if (!confirmar) return;
@@ -142,12 +136,26 @@ function eliminarUsuario(id) {
     });
 }
 
-// LIMPIAR FORMULARIO
+function pruebaFirebase() {
+  db.collection("usuarios").add({
+    nombre: "Prueba",
+    correo: "prueba@gmail.com"
+  })
+  .then(() => {
+    console.log("Se guardó bien");
+    alert("Se guardó bien");
+    leerUsuarios();
+  })
+  .catch((error) => {
+    console.error("Error al guardar:", error);
+    alert("Error al guardar");
+  });
+}
+
 function limpiar() {
   document.getElementById("nombre").value = "";
   document.getElementById("correo").value = "";
   idSeleccionado = null;
 }
 
-// INICIALIZAR
 leerUsuarios();
