@@ -1,25 +1,120 @@
 <!DOCTYPE html>
+
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CRUD Firebase</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #0f172a, #1e293b);
+      margin: 0;
+      color: #fff;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 50px auto;
+      background: #1e293b;
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0 0 25px rgba(0,0,0,0.5);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      border-radius: 8px;
+      border: none;
+      outline: none;
+      font-size: 16px;
+    }
+
+    .buttons {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    button {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: 0.3s;
+    }
+
+    .btn-guardar { background: #22c55e; color: #000; }
+    .btn-actualizar { background: #3b82f6; color: #fff; }
+    .btn-limpiar { background: #f59e0b; color: #000; }
+    .btn-prueba { background: #a855f7; color: #fff; }
+
+    button:hover {
+      transform: scale(1.05);
+      opacity: 0.9;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin-top: 20px;
+    }
+
+    li {
+      background: #0f172a;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .acciones button {
+      margin-left: 5px;
+      padding: 6px 10px;
+      font-size: 12px;
+    }
+
+    .btn-editar { background: #3b82f6; color: white; }
+    .btn-eliminar { background: #ef4444; color: white; }
+
+  </style>
+
 </head>
 <body>
 
+<div class="container">
   <h1>CRUD de Usuarios</h1>
 
   <input type="text" id="nombre" placeholder="Nombre">
   <input type="email" id="correo" placeholder="Correo">
 
-  <button onclick="crearUsuario()">Guardar</button>
-  <button onclick="actualizarUsuario()">Actualizar</button>
-  <button onclick="limpiar()">Limpiar</button>
+  <div class="buttons">
+    <button class="btn-guardar" onclick="crearUsuario()">Guardar</button>
+    <button class="btn-actualizar" onclick="actualizarUsuario()">Actualizar</button>
+    <button class="btn-limpiar" onclick="limpiar()">Limpiar</button>
+    <button class="btn-prueba" onclick="pruebaFirebase()">Prueba</button>
+  </div>
 
   <ul id="lista"></ul>
+</div>
 
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
 <script>
 const firebaseConfig = {
   apiKey: "AIzaSyCLUbc6f6HmkAa3XEHfYeiS2g9HtVmirpU",
@@ -33,72 +128,44 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-console.log("Firebase conectado");
-
 let idSeleccionado = null;
 
 function correoValido(correo) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo);
 }
 
+// TIEMPO REAL 
+db.collection("usuarios").onSnapshot(snapshot => {
+  const lista = document.getElementById("lista");
+  lista.innerHTML = "";
+
+  snapshot.forEach(doc => {
+    const data = doc.data();
+
+    lista.innerHTML += `
+      <li>
+        <div>
+          <strong>${data.nombre}</strong><br>
+          <small>${data.correo}</small>
+        </div>
+        <div class="acciones">
+          <button class="btn-editar" onclick="editarUsuario('${doc.id}', '${data.nombre}', '${data.correo}')">Editar</button>
+          <button class="btn-eliminar" onclick="eliminarUsuario('${doc.id}')">Eliminar</button>
+        </div>
+      </li>
+    `;
+  });
+});
+
 function crearUsuario() {
   const nombre = document.getElementById("nombre").value.trim();
   const correo = document.getElementById("correo").value.trim();
 
-  if (nombre === "" || correo === "") {
-    alert("Completa todos los campos.");
-    return;
-  }
+  if (!nombre || !correo) return alert("Completa los campos");
+  if (!correoValido(correo)) return alert("Correo inválido");
 
-  if (!correoValido(correo)) {
-    alert("Ingresa un correo válido.");
-    return;
-  }
-
-  db.collection("usuarios").add({
-    nombre: nombre,
-    correo: correo
-  })
-  .then(() => {
-    limpiar();
-    leerUsuarios();
-    alert("Usuario guardado correctamente.");
-  })
-  .catch((error) => {
-    console.error("Error al guardar:", error);
-    alert("Ocurrió un error al guardar el usuario.");
-  });
-}
-
-function leerUsuarios() {
-  const lista = document.getElementById("lista");
-  lista.innerHTML = "<li>Cargando usuarios...</li>";
-
-  db.collection("usuarios").get()
-    .then((snapshot) => {
-      lista.innerHTML = "";
-
-      if (snapshot.empty) {
-        lista.innerHTML = "<li>No hay usuarios registrados.</li>";
-        return;
-      }
-
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-
-        lista.innerHTML += `
-          <li>
-            <strong>${data.nombre}</strong> - ${data.correo}
-            <button onclick="editarUsuario('${doc.id}', '${data.nombre}', '${data.correo}')">Editar</button>
-            <button onclick="eliminarUsuario('${doc.id}')">Eliminar</button>
-          </li>
-        `;
-      });
-    })
-    .catch((error) => {
-      console.error("Error al leer usuarios:", error);
-      lista.innerHTML = "<li>Error al cargar usuarios.</li>";
-    });
+  db.collection("usuarios").add({ nombre, correo });
+  limpiar();
 }
 
 function editarUsuario(id, nombre, correo) {
@@ -108,57 +175,19 @@ function editarUsuario(id, nombre, correo) {
 }
 
 function actualizarUsuario() {
+  if (!idSeleccionado) return alert("Selecciona un usuario");
+
   const nombre = document.getElementById("nombre").value.trim();
   const correo = document.getElementById("correo").value.trim();
 
-  if (idSeleccionado === null) {
-    alert("Primero selecciona un usuario para editar.");
-    return;
-  }
-
-  if (nombre === "" || correo === "") {
-    alert("Completa todos los campos.");
-    return;
-  }
-
-  if (!correoValido(correo)) {
-    alert("Ingresa un correo válido.");
-    return;
-  }
-
-  db.collection("usuarios").doc(idSeleccionado).update({
-    nombre: nombre,
-    correo: correo
-  })
-  .then(() => {
-    limpiar();
-    leerUsuarios();
-    alert("Usuario actualizado correctamente.");
-  })
-  .catch((error) => {
-    console.error("Error al actualizar:", error);
-    alert("Ocurrió un error al actualizar el usuario.");
-  });
+  db.collection("usuarios").doc(idSeleccionado).update({ nombre, correo });
+  limpiar();
 }
 
 function eliminarUsuario(id) {
-  const confirmar = confirm("¿Seguro que deseas eliminar este usuario?");
-  if (!confirmar) return;
-
-  db.collection("usuarios").doc(id).delete()
-    .then(() => {
-      if (idSeleccionado === id) {
-        limpiar();
-      }
-      leerUsuarios();
-      alert("Usuario eliminado correctamente.");
-    })
-    .catch((error) => {
-      console.error("Error al eliminar:", error);
-      alert("Ocurrió un error al eliminar el usuario.");
-    });
+  if (!confirm("¿Eliminar usuario?")) return;
+  db.collection("usuarios").doc(id).delete();
 }
-
 
 function limpiar() {
   document.getElementById("nombre").value = "";
@@ -166,7 +195,13 @@ function limpiar() {
   idSeleccionado = null;
 }
 
-leerUsuarios();
+function pruebaFirebase() {
+  db.collection("usuarios").add({
+    nombre: " Usuario",
+    correo: "UIIUIU@gmail.com"
+  });
+}
 </script>
+
 </body>
 </html>
