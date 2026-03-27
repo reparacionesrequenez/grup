@@ -1,8 +1,11 @@
 // CONFIGURACIÓN FIREBASE
 const firebaseConfig = {
- apiKey: "AIzaSyCLUbc6f6HmkAa3XEHfYeiS2g9HtVmirpU",
+  apiKey: "AIzaSyCLUbc6f6HmkAa3XEHfYeiS2g9HtVmirpU",
   authDomain: "crud-online-ca595.firebaseapp.com",
-  projectId: "crud-online-ca595"
+  projectId: "crud-online-ca595",
+  storageBucket: "crud-online-ca595.firebasestorage.app",
+  messagingSenderId: "664875061888",
+  appId: "1:664875061888:web:53a76a7062c78f7f498c65"
 };
 
 firebase.initializeApp(firebaseConfig);
