@@ -15,7 +15,6 @@
   <button onclick="crearUsuario()">Guardar</button>
   <button onclick="actualizarUsuario()">Actualizar</button>
   <button onclick="limpiar()">Limpiar</button>
-  <button onclick="pruebaFirebase()">Prueba Firebase</button>
 
   <ul id="lista"></ul>
 
@@ -160,21 +159,6 @@ function eliminarUsuario(id) {
     });
 }
 
-function pruebaFirebase() {
-  db.collection("usuarios").add({
-    nombre: "Prueba",
-    correo: "prueba@gmail.com"
-  })
-  .then(() => {
-    console.log("Se guardó bien");
-    alert("Se guardó bien");
-    leerUsuarios();
-  })
-  .catch((error) => {
-    console.error("Error al guardar:", error);
-    alert("Error al guardar");
-  });
-}
 
 function limpiar() {
   document.getElementById("nombre").value = "";
