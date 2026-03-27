@@ -14,65 +14,132 @@ const db = firebase.firestore();
 // VARIABLE GLOBAL
 let idSeleccionado = null;
 
+// VALIDAR EMAIL
+function correoValido(correo) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo);
+}
+
 // CREATE (Crear)
 function crearUsuario() {
-  const nombre = document.getElementById("nombre").value;
-  const correo = document.getElementById("correo").value;
+  const nombre = document.getElementById("nombre").value.trim();
+  const correo = document.getElementById("correo").value.trim();
+
+  if (nombre === "" || correo === "") {
+    alert("Completa todos los campos.");
+    return;
+  }
+
+  if (!correoValido(correo)) {
+    alert("Ingresa un correo válido.");
+    return;
+  }
 
   db.collection("usuarios").add({
     nombre: nombre,
     correo: correo
-  }).then(() => {
+  })
+  .then(() => {
     limpiar();
     leerUsuarios();
+    alert("Usuario guardado correctamente.");
+  })
+  .catch((error) => {
+    console.error("Error al guardar:", error);
+    alert("Ocurrió un error al guardar el usuario.");
   });
 }
 
 // READ (Leer)
 function leerUsuarios() {
   const lista = document.getElementById("lista");
-  lista.innerHTML = "";
+  lista.innerHTML = "<li>Cargando usuarios...</li>";
 
-  db.collection("usuarios").get().then(snapshot => {
-    snapshot.forEach(doc => {
-      const data = doc.data();
+  db.collection("usuarios").get()
+    .then((snapshot) => {
+      lista.innerHTML = "";
 
-      lista.innerHTML += `
-        <li>
-          ${data.nombre} - ${data.correo}
-          <button onclick="editarUsuario('${doc.id}', '${data.nombre}', '${data.correo}')">Editar</button>
-          <button onclick="eliminarUsuario('${doc.id}')">Eliminar</button>
-        </li>
-      `;
+      if (snapshot.empty) {
+        lista.innerHTML = "<li>No hay usuarios registrados.</li>";
+        return;
+      }
+
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+
+        lista.innerHTML += `
+          <li>
+            <strong>${data.nombre}</strong> - ${data.correo}
+            <button onclick="editarUsuario('${doc.id}', '${data.nombre}', '${data.correo}')">Editar</button>
+            <button onclick="eliminarUsuario('${doc.id}')">Eliminar</button>
+          </li>
+        `;
+      });
+    })
+    .catch((error) => {
+      console.error("Error al leer usuarios:", error);
+      lista.innerHTML = "<li>Error al cargar usuarios.</li>";
     });
-  });
 }
 
-// UPDATE (Actualizar)
+// UPDATE (Preparar edición)
 function editarUsuario(id, nombre, correo) {
   document.getElementById("nombre").value = nombre;
   document.getElementById("correo").value = correo;
   idSeleccionado = id;
 }
 
+// UPDATE (Actualizar)
 function actualizarUsuario() {
-  const nombre = document.getElementById("nombre").value;
-  const correo = document.getElementById("correo").value;
+  const nombre = document.getElementById("nombre").value.trim();
+  const correo = document.getElementById("correo").value.trim();
+
+  if (idSeleccionado === null) {
+    alert("Primero selecciona un usuario para editar.");
+    return;
+  }
+
+  if (nombre === "" || correo === "") {
+    alert("Completa todos los campos.");
+    return;
+  }
+
+  if (!correoValido(correo)) {
+    alert("Ingresa un correo válido.");
+    return;
+  }
 
   db.collection("usuarios").doc(idSeleccionado).update({
     nombre: nombre,
     correo: correo
-  }).then(() => {
+  })
+  .then(() => {
     limpiar();
     leerUsuarios();
+    alert("Usuario actualizado correctamente.");
+  })
+  .catch((error) => {
+    console.error("Error al actualizar:", error);
+    alert("Ocurrió un error al actualizar el usuario.");
   });
 }
 
 // DELETE (Eliminar)
 function eliminarUsuario(id) {
-  db.collection("usuarios").doc(id).delete().then(() => {
-    leerUsuarios();
-  });
+  const confirmar = confirm("¿Seguro que deseas eliminar este usuario?");
+  if (!confirmar) return;
+
+  db.collection("usuarios").doc(id).delete()
+    .then(() => {
+      if (idSeleccionado === id) {
+        limpiar();
+      }
+      leerUsuarios();
+      alert("Usuario eliminado correctamente.");
+    })
+    .catch((error) => {
+      console.error("Error al eliminar:", error);
+      alert("Ocurrió un error al eliminar el usuario.");
+    });
 }
 
 // LIMPIAR FORMULARIO

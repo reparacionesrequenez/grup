@@ -1,25 +1,23 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
+  <meta charset="UTF-8">
   <title>CRUD Firebase</title>
-  <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <h1>CRUD de Usuarios</h1>
 
-<h1>CRUD de Usuarios</h1>
+  <input type="text" id="nombre" placeholder="Nombre">
+  <input type="email" id="correo" placeholder="Correo">
 
-<input type="text" id="nombre" placeholder="Nombre">
-<input type="email" id="correo" placeholder="Correo">
+  <button onclick="crearUsuario()">Guardar</button>
+  <button onclick="actualizarUsuario()">Actualizar</button>
+  <button onclick="limpiar()">Limpiar</button>
 
-<button onclick="crearUsuario()">Guardar</button>
-<button onclick="actualizarUsuario()">Actualizar</button>
+  <ul id="lista"></ul>
 
-<ul id="lista"></ul>
-
-<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
-
-<script src="app.js"></script>
-
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
